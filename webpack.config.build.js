@@ -1,22 +1,17 @@
 const path = require('path');
 const webpack = require('webpack');
 const resolve = require('path').resolve;
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     mode: 'production',
-    entry: {
-        bable: 'babel-polyfill',
-        index: './demo/index',
-        custom: './demo/custom/index',
-        autosort: './demo/autosort/index',
-        animate: './demo/animate/index'
-    },
+    entry: [
+        './src/index'
+    ],
     output: {
-        filename: '[name].js',
-        path: __dirname + '/dist'
+        filename: 'aworkflow.js',
+        library: 'AWorkflow',
+        libraryTarget: 'umd',
+        path: resolve(__dirname, 'build/')
     },
     module: {
         rules: [
@@ -58,31 +53,5 @@ module.exports = {
                 ]
             }
         ]
-    },
-    plugins: [
-        new CleanWebpackPlugin(['dist']),
-        new HtmlWebpackPlugin({
-            template: './demo/index.html',
-            chunks: ['index']
-        }),
-        new HtmlWebpackPlugin({
-            filename: './demo/custom/index.html',
-            template: './demo/custom/index.html',
-            inject: true,
-            chunks: ['custom']
-        }),
-        new HtmlWebpackPlugin({
-            filename: './demo/autosort/index.html',
-            template: './demo/autosort/index.html',
-            inject: true,
-            chunks: ['autosort']
-        }),
-        new HtmlWebpackPlugin({
-            filename: './demo/animate/index.html',
-            template: './demo/animate/index.html',
-            inject: true,
-            chunks: ['animate']
-        }),
-        new webpack.NamedModulesPlugin()
-    ]
+    }
 };

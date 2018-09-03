@@ -22,6 +22,16 @@ npm run dev
 
 自定义模版：http://localhost:9999/demo/custom
 
+也可以访问在线demo:
+
+默认模版：http://zhoushengfe.com/flow/dist/index.html
+
+动画：http://zhoushengfe.com/flow/dist/demo/animate/index.html
+
+自动排列：http://zhoushengfe.com/flow/dist/demo/autosort/index.html
+
+自定义模版：http://zhoushengfe.com/flow/dist/demo/custom/index.html
+
 ## 技术文档
 
 ### 快速开始
