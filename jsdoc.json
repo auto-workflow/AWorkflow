@@ -1,0 +1,39 @@
+{
+  "source": {
+    "include": ["src/AWorkflow.js"],
+    "includePattern": ".+\\.js(doc)?$"
+  },
+  "opts": {
+    "template": "./node_modules/minami",
+    "encoding": "utf8",
+    "destination": "./doc/api/",
+    "private": true,
+    "recurse": true
+  },
+  "plugins": ["./node_modules/jsdoc-export-default-interop/dist/index"],
+  "templates": {
+    "applicationName": "AWorkflow",
+    "cleverLinks": false,
+    "monospaceLinks": true,
+    "useLongnameInNav": false,
+    "showInheritedInNav": true,
+    "disqus": "",
+    "googleAnalytics": "",
+    "openGraph": {
+      "title": "",
+      "type": "",
+      "image": "",
+      "site_name": "",
+      "url": ""
+    },
+    "meta": {
+      "title": "",
+      "description": "",
+      "keyword": ""
+    }
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc"]
+  }
+}

@@ -1,0 +1,11 @@
+{
+    "presets": [
+        ["env", {"modules": false}],
+        "stage-1"
+    ],
+    "env": {
+        "test": {
+          "presets": ["power-assert", "env", "stage-1"]
+        }
+    }
+}

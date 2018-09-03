@@ -1,0 +1,478 @@
+/**
+ * @file workflow
+ * @author zhousheng yangpei xueliqiang
+ */
+
+import zrender from 'zrender';
+import ComPlate from './comPlate';
+import OptionsManager from './OptionsManager';
+import Node from './draw/Node';
+import Edge from './draw/Edge';
+import Draw from './draw/Draw';
+import './draw/basicdraw/DrawView';
+import './draw/basicdraw/NodeView';
+import './draw/basicdraw/EdgeView';
+import autoSort from './autoSort';
+import ZrEventManager from './event/ZrEventManager';
+import * as zrUtil from 'zrender/lib/core/util';
+import Eventful from 'zrender/lib/mixin/Eventful';
+import * as utils from './utils';
+import MenuManager from './menu/MenuManager';
+
+let comPlate = new ComPlate();
+
+/**
+ * AWorkflow
+ */
+export default class AWorkflow {
+
+    /**
+     * AWorkflow
+     *
+     * @constructor
+     * @param {HTMLDomElement} dom 渲染容器
+    * @param {Object} data 渲染数据
+    * @param {Array} data.nodes 节点数据
+    * @param {Array} data.edges 连线数据
+    * @param {Object} globalConfig 配置项
+    * @param {boolean=} globalConfig.isStatic 是否静态图片
+    * @param {string=} globalConfig.templateName 整个图默认模版
+    * @param {boolean=} globalConfig.autoSort 是否需要自动排序，true: 程序智能计算每个node的位置，false: 根据node position来定位
+    * @param {boolean=} globalConfig.horizontal 自动排序时，true: 水平排序，false: 垂直排序
+    * @param {align=} globalConfig.align node对齐方式，start: 水平排列时表示上对齐，垂直排列时表示左对齐 middle: 中间对齐 end: 水平排列时表示下对齐，垂直排列时表示右对齐
+    * @param {number=} globalConfig.cWidth 画布宽度
+    * @param {number=} globalConfig.cHeight 画布高度
+    * @param {number=} globalConfig.beginX 起点X坐标
+    * @param {number=} globalConfig.beginY 起点Y坐标
+    * @param {number=} globalConfig.spaceX 横向间距，默认50
+    * @param {number=} globalConfig.spaceY 纵向间距，默认20
+     */
+    constructor(dom, data, globalConfig) {
+        if (!dom || !zrUtil.isDom(dom)) {
+            throw new TypeError('Aworkflow needs a HTMLDomElement to render');
+        }
+        this.dom = dom;
+        this.data = data;
+        this.optionsManager = new OptionsManager(globalConfig);
+        this._zr = zrender.init(dom, this.optionsManager.getZrOptions());
+        this.workflowObj = {};
+        this.drawGroup = null;
+        this.maxCoord = {
+            x: 0,
+            y: 0
+        };
+        this.render();
+        this.menuManager = new MenuManager(this);
+        ZrEventManager.addDefaultEventHandlers(this);
+        Eventful.call(this);
+    }
+
+    // 注册模版
+    static registerTemplate(...args) {
+        comPlate.registerTemplate.call(comPlate, ...args);
+    }
+
+    setWorkflowObj(draw) {
+        this.workflowObj = {
+            nodes: draw.nodes,
+            edges: draw.edges
+        };
+    }
+    getNodesIns() {
+        return this.workflowObj.nodes;
+    }
+    getNodeInsById(id) {
+        return this.workflowObj.nodes.find(node => node.props.id === id);
+    }
+    getEdgesIns() {
+        return this.workflowObj.edges;
+    }
+    getEdgeInsById(src, to) {
+        return this.workflowObj.edges.find(edge => src === edge.props.src && to === edge.props.to);
+    }
+
+    getMaxCoord() {
+        return this.maxCoord;
+    }
+
+    render() {
+        const {nodes, edges} = this.data;
+        // 编译
+        let templateData = comPlate.compileTemplate(nodes, edges, this.optionsManager.options);
+        if (this.optionsManager.options.autoSort) {
+            templateData.nodes = autoSort(Object.assign({
+                nodes: templateData.nodes,
+                edges: templateData.edges
+            }, this.optionsManager.options));
+            let xArr = [];
+            let yArr = [];
+            templateData.nodes.forEach(node => {
+                xArr.push(node.position[0]);
+                yArr.push(node.position[1]);
+            });
+            this.maxCoord.x = Math.max(...xArr);
+            this.maxCoord.y = Math.max(...yArr);
+        }
+        const DrawClazz = Draw.getClazzByName('basic');
+        const draw = new DrawClazz({
+            props: templateData
+        });
+
+        this.drawGroup = draw.render(this._zr, this.optionsManager.options);
+        this._zr.add(this.drawGroup);
+        this.setWorkflowObj(draw);
+    }
+
+    /**
+     * 获取指定名称的模版对象
+     *
+     * @param {string} templateName 模版名称
+     * @return {Object} compileObj 编译后的对象
+     */
+    getTemplate(templateName) {
+        return comPlate.getTemplate.call(comPlate, templateName);
+    }
+
+    /**
+     * 更新指定名称的模版对象
+     *
+     * @param {string} templateName 模版名称
+     * @param {Object} templateUpdateObj 模版对象
+     * @return {undefined}
+     */
+    updateTemplate(templateName, templateUpdateObj) {
+        comPlate.updateTemplate.call(comPlate, templateName, templateUpdateObj);
+    }
+
+    /**
+     * 添加节点
+     *
+     * @param {Object} node 节点信息
+     * @param {string} node.id 节点id
+     * @param {boolean=} preventCusEvent 是否阻止触发添加节点event(addNode), false触发，true不触发
+     */
+    addNode(node, preventCusEvent) {
+        if (this.findNodeIndex(node.id) > -1) {
+            throw new Error(`Node with id(${node.id}) is exist`);
+        }
+        else {
+            const options = this.optionsManager.options;
+            const templateData = comPlate.compileTemplate([node], [], options);
+
+            let NodeClass = Node.getClazzByName('basicNode');
+            const n = new NodeClass({
+                props: templateData.nodes[0]
+            });
+            this.drawGroup.add(n.render(this.optionsManager.options));
+            this.workflowObj.nodes.push(n);
+            // add node to this.data
+            this.data.nodes.push(node);
+            preventCusEvent || this.triggerCustomEvent('addNode', {target: n});
+        }
+    }
+
+    /**
+     * 删除节点
+     *
+     * @param {Object} node 节点信息
+     * @param {string} node.id 节点id
+     * @param {boolean=} preventCusEvent 是否阻止触发删除节点event(removeNode), false触发，true不触发
+     */
+    removeNode(node, preventCusEvent) {
+        // find node and delete NodeView instance
+        const findNodeIndex = this.findNodeIndex(node.id);
+        let nodeToDelete;
+        if (findNodeIndex > -1) {
+            nodeToDelete = this.workflowObj.nodes[findNodeIndex];
+            this.workflowObj.nodes.splice(findNodeIndex, 1);
+            this.removeEl(nodeToDelete.dom.group);
+        }
+
+        // delete from this.data
+        this.data.nodes = this.data.nodes.filter(n => n.id !== node.id);
+        // delete edges related to the node
+        this.updateEdgeByNode(node.id);
+
+        preventCusEvent || this.triggerCustomEvent('removeNode', {target: nodeToDelete});
+    }
+
+    /**
+     * 添加连线
+     *
+     * @param {Object} edge 节点信息
+     * @param {string} edge.src 输入点
+     * @param {string} edge.to 输出点
+     * @param {boolean=} preventCusEvent 是否阻止触发添加连线event(addEdge), false触发，true不触发
+     */
+    addEdge(edge, preventCusEvent) {
+        const options = this.optionsManager.options;
+        const templateData = comPlate.compileTemplate([], [edge], options);
+        const e = templateData.edges[0];
+        const linePoints = utils.calcuLinePoints(e, this.workflowObj.nodes);
+
+        if (!linePoints) {
+            return;
+        }
+
+        const props = {
+            ...linePoints,
+            ...e
+        };
+
+        let EdgeClass = Edge.getClazzByName('basicEdge');
+        const eIns = new EdgeClass({props});
+        this.drawGroup.add(eIns.render(this.optionsManager.options));
+        this.workflowObj.edges.push(eIns);
+        // add edge to this.data
+        this.data.edges.push(edge);
+        // no need to trigger addEdge event when node is dragging to move which make edge re-create.
+        preventCusEvent || this.triggerCustomEvent('addEdge', {target: eIns});
+    }
+
+    /**
+     * 删除连线
+     *
+     * @param {Object} edge 连线信息
+     * @param {string} edge.src 输入点
+     * @param {string} edge.to 输出点
+     * @param {boolean=} preventCusEvent 是否阻止触发删除连线event(removeEdge), false触发，true不触发
+     */
+    removeEdge(edge, preventCusEvent) {
+        // find edge
+        const findedgeIndex = this.workflowObj.edges.findIndex(e =>
+            e.props.src === edge.src && e.props.to === edge.to);
+        let edgeToDelete;
+        if (findedgeIndex > -1) {
+            edgeToDelete = this.workflowObj.edges[findedgeIndex];
+            this.workflowObj.edges.splice(findedgeIndex, 1);
+            this.removeEl(edgeToDelete.dom.group);
+        }
+        // delete from this.data
+        this.data.edges = this.data.edges.filter(e => e.src === edge.src && e.to === edge.to);
+        preventCusEvent || this.triggerCustomEvent('removeEdge', {target: edgeToDelete});
+    }
+
+    /**
+     * 删除元素
+     *
+     * @param {zrender.Displayable} el aworkflow中保存的zrender图形实例
+     */
+    removeEl(el) {
+        this.drawGroup.remove(el);
+    }
+
+    /**
+     * 缩放
+     *
+     * @param {Array<number>} scale 缩放比例[scalex, scaley]
+     * @param {Array<number>} center 缩放参考原点[x, y]
+     */
+    setScale(scale, center) {
+        if (this._zr && this.drawGroup) {
+            this.drawGroup.attr({
+                scale: [scale, scale],
+                origin: center
+            });
+            this._zr.flush();
+        }
+    }
+
+    /**
+     * 根据节点id查询节点实例对象
+     *
+     * @param {string} id 节点id
+     * @return {number} 查找到的节目下标，没有查到则为-1
+     */
+    findNodeIndex(id) {
+        return this.workflowObj.nodes.findIndex(n => n.props.id === id);
+    }
+
+    /**
+     * 根据节点id查询节点实例对象
+     *
+     * @param {string} src 连线起始点信息
+     * @param {string} to 连线终点信息
+     * @return {number} 查找到的连线对象下标，没有查到则为-1
+     */
+    findEdgeIndex(src, to) {
+        return this.workflowObj.edges.findIndex(e => e.props.src === src && e.props.to === to);
+    }
+
+    /**
+     * 根据ID更新对应的节点
+     *
+     * @param {string} id 节点id
+     * @param {string|Object} selector 如果是string，则是节点的子形状；如果是Object，则直接对节点更新
+     * @param {Object=} attributes 如果selector是string，则为待更新的属性,属性参考对应形状的zrender实例
+     */
+    updateNode(id, selector, attributes) {
+        const index = this.findNodeIndex(id);
+        if (index === -1) {
+            throw new Error(`There is no node with id ${id}`);
+        }
+        const nodeToUpdate = this.workflowObj.nodes[index];
+        if (zrUtil.isObject(selector) && !attributes) {
+            // const oldPosition = nodeToUpdate.dom.group.po
+            // 如果更新了node的位置，需要更新连线
+            nodeToUpdate.dom.group.attr(selector);
+            if (selector.position
+                && selector.position.join('') !== nodeToUpdate.props.position.join('')) {
+                nodeToUpdate.props.position = Array.from(selector.position);
+                this.updateEdgeByNode(id);
+            }
+        }
+        else if (zrUtil.isString(selector) && zrUtil.isObject(attributes)) {
+            if (nodeToUpdate.children[selector]) {
+                // 更新对应形状的props
+                const currStatus = nodeToUpdate.children[selector].status;
+                const currProps = nodeToUpdate.children[selector].props[currStatus];
+                zrUtil.merge(currProps, attributes, true);
+                // 更新Node的props
+                nodeToUpdate.props.config[selector] = zrUtil.merge({}, nodeToUpdate.children[selector].props, true);
+                // 如果没有更新shape属性，就直接使用zrender实例的方法设置属性
+                if (!attributes.shape) {
+                    nodeToUpdate.children[selector].dom.attr(attributes);
+                }
+                else {
+                    // 根据最新的属性重新绘制node
+                    this.removeNode(nodeToUpdate.props, true);
+                    this.addNode(nodeToUpdate.props, true);
+                    // 更新相关的连线
+                    this.updateEdgeByNode(id);
+                }
+            }
+            else {
+                throw new Error(`There is no shape with name(${selector}) in node(id:${id})`);
+            }
+        }
+        else {
+            throw new Error('invalid params');
+        }
+    }
+
+    /**
+     * 更新连线
+     *
+     * @param {Object} edge 连线信息
+     * @param {string} edge.src 起点信息
+     * @param {string} edge.to 终点信息
+     * @param {string} selector 节点的子形状
+     * @param {Object} attributes 待更新的属性,属性参考对应形状的zrender实例,暂不支持根据本地Shape的props更新
+     */
+    updateEdge(edge, selector, attributes) {
+        if (!edge || !edge.src || !edge.to || !zrUtil.isString(selector) || !zrUtil.isObject(attributes)) {
+            throw new Error('invalid params when invoking updateEdge()');
+        }
+        const index = this.findEdgeIndex(edge.src, edge.to);
+        if (index === -1) {
+            throw new Error(`There is no Edge with src(${edge.src}) and to(${edge.to})`);
+        }
+        const edgeToUpdate = this.workflowObj.edges[index];
+        const shapeToUpdate = edgeToUpdate.children[selector];
+        if (shapeToUpdate) {
+            const status = shapeToUpdate.status;
+            const props = shapeToUpdate.props[status];
+            const prevShapeWidth = props.shape.width;
+            const prevShapeHeight = props.shape.height;
+            zrUtil.merge(props, attributes, true);
+            edgeToUpdate.props.config[selector] = zrUtil.merge({}, shapeToUpdate.props, true);
+            if (selector === 'triangle') {
+                if (attributes.shape) {
+                    if (Number(attributes.shape.width) !== prevShapeWidth
+                        || Number(attributes.shape.height) !== prevShapeHeight) {
+                        // 如果箭头的宽高或者指向有变化，需要重新修改顶点坐标
+                        const renderProps = shapeToUpdate.getRenderProps();
+                        const end = shapeToUpdate.props.end;
+                        const width = renderProps.shape.width;
+                        const height = renderProps.shape.height;
+                        const points = utils.cacluTrianglePoints(width, height, end, shapeToUpdate.props.pointTo);
+                        renderProps.shape.points = points;
+                        shapeToUpdate.dom.attr(renderProps);
+                    }
+                    // 如果shape有调整，则重新画线
+                    this.removeEdge(edgeToUpdate.props, true);
+                    this.addEdge(edgeToUpdate.props, true);
+                }
+                else {
+                    shapeToUpdate.dom.attr(attributes);
+                }
+            }
+            else {
+                shapeToUpdate.dom.attr(attributes);
+            }
+        }
+    }
+
+    /**
+     * 更新节点相关的连线
+     *
+     * @param {string} nodeId 更新过的节点id
+     */
+    updateEdgeByNode(nodeId) {
+        const edges = this.workflowObj.edges.filter(e =>
+            e.props.src.split(':')[0] === nodeId || e.props.to.split(':')[0] === nodeId);
+        edges.forEach(e => {
+            let edgeItem = {
+                ...e.props
+            };
+            // 刷新连线，需要保留原有的设置，同时删除连线的起止点信息
+            delete edgeItem.start;
+            delete edgeItem.end;
+            delete edgeItem.config.triangle.start;
+            delete edgeItem.config.triangle.end;
+            this.removeEdge(edgeItem, true);
+            this.addEdge(edgeItem, true);
+        });
+    }
+
+    /**
+     * 生成连线的上下文菜单
+     *
+     * @param {Array<Menu>} edgeMenus 菜单配置
+     */
+    edgeMenus(edgeMenus) {
+        this.menuManager.buildEdgeMenus(edgeMenus);
+    }
+
+    /**
+     * 生成元素的上下文菜单
+     *
+     * @param {Array<Menu>} nodeMenus 菜单配置
+     */
+    nodeMenus(nodeMenus) {
+        this.menuManager.buildNodeMenus(nodeMenus);
+    }
+
+    /**
+     * 触发绑定的自定义事件
+     *
+     * @param {string} type 自定义事件类型
+     * @param {Object} e 事件对象
+     */
+    triggerCustomEvent(type, e) {
+        if (!e.target) {
+            return;
+        }
+
+        let mouseEvents = ['mousedown', 'click', 'mouseover', 'mouseout', 'mouseup', 'mousemove', 'contextmenu'];
+        let domEvents = ['dragNode', 'addEdge', 'removeEdge', 'addNode', 'removeNode'];
+
+        let eventPack = [];
+        if (mouseEvents.indexOf(type) > -1) {
+            eventPack.push(this, e);
+        }
+        else if (domEvents.indexOf(type) > -1) {
+            eventPack.push(e.target);
+        }
+        else {
+            console.warn(`No such custom event "${type}" in lib`);
+            return;
+        }
+
+        this.isSilent(type)
+        && this.trigger.apply(this, [type, ...eventPack]);
+    }
+}
+
+zrUtil.mixin(AWorkflow, Eventful);
+

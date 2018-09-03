@@ -1,0 +1,14 @@
+machine:
+  node:
+    version: 5.1.0
+
+dependencies:
+  override:
+    - npm install
+
+test:
+  override:
+    - npm run test | node_modules/.bin/tap-xunit --package="ModuleBoilerplate" > ${CIRCLE_TEST_REPORTS}/tape.xml
+    - node_modules/.bin/eslint --format junit --output-file ${CIRCLE_TEST_REPORTS}/eslint.xml lib
+    - node_modules/.bin/babel-node node_modules/.bin/isparta cover --report lcov --report text --report html --verbose --dir ${CIRCLE_ARTIFACTS}/coverage test/index.js
+    - cat ${CIRCLE_ARTIFACTS}/coverage/lcov.info | node_modules/.bin/coveralls
