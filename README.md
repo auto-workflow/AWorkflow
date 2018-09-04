@@ -156,7 +156,7 @@ let workflow = new AWrokflow(document.getElementById('aw'), {nodes, edges}, glob
 在渲染工作流中，为了方便地处理缩放，所以整个工作流的图形集合是一个对象，对应zrender中的```Group```类，默认情况下是Aworkflow中的```DrawView```类，在```DrawView```中包含了```NodeView```和```EdgeView```，```NodeView```和```EdgeView```是由不同的Shape组成的Group。    
 如果想自定义一个渲染规则，可以参考```src/draw/basicdraw/DrawView.js```中的代码，使用```Draw.extend()```实现一个自定义的类，需要设置```type```字段，并且实现```render()```方法，```render()```方法中需要将最终使用的zrender的形状实例对象return出去，以便于在Aworkflow中add到zrender对象中。    
 (这个地方实现的好像不太好)
-    
+    
 #### NodeView
 Node是工作流中的节点，默认的实现类是```src/draw/basicDraw/NodeView```，父类是```src/draw/Node```，Node也是一个```Group```，包含了像文字（Text），图标（Image），矩形（Rect）等基本形状。在NodeView中render输入输出点的时候，会根据点的个数和Node的position来计算出每个点的坐标来绘制，同时可以在config中配置input或者output在node中的位置，如top、right、bottom、left。    
 同样，如果想要自定义一个Node，需要使用```Node.extend()```方法，需要定义type和实现```render()```方法，```render()```方法中需要将最终使用的zrender的形状实例对象return出去，以便于在```DrawView```或者父集合对象中add到对应的Group对象中。   
