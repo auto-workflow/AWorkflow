@@ -138,7 +138,7 @@ let redTemplate = {
             hover: {
                 style: {
                     stroke: '#79818F',
-                    lineWidth: 4
+                    lineWidth: 1
                 }
             },
             selected: {
@@ -154,8 +154,7 @@ let redTemplate = {
                 invisible: true,
                 style: {
                     stroke: '#f5f5f5',
-                    lineWidth: 18,
-
+                    lineWidth: 10
                 }
             }
         },
@@ -224,7 +223,7 @@ let node2 = {
         nodeName: '随机采样'
     },
     // 画布中位置
-    position: [200, 150],
+    position: [400, 400],
     // 输入
     input: [
         {
@@ -248,7 +247,8 @@ let nodes = [
 let edges = [
     {
         src: '123:0',
-        to: '124:0'
+        to: '124:0',
+        passPos: [[150, 150], [300, 300]]
     }
 ];
 // 实例化
