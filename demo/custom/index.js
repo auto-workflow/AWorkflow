@@ -263,6 +263,6 @@ let globalConfig = {
     autoSort: false,
     // 自动排序时，true: 水平排序，false: 垂直排序
     horizontal: false
-}
+};
 let workflow = new AWrokflow(document.getElementById('aw'), {nodes, edges}, globalConfig);
-console.log(workflow);
+
