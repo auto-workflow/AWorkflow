@@ -133,7 +133,6 @@ let edges = [
     }
 ];
 
-// 实例化
 // 模版配置，主要用于样式
 let globalConfig = {
     // 是否静态图片
