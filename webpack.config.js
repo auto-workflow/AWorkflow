@@ -10,7 +10,8 @@ module.exports = {
         index: './demo/index',
         custom: './demo/custom/index',
         autosort: './demo/autosort/index',
-        animate: './demo/animate/index'
+        animate: './demo/animate/index',
+        process: './demo/process/index'
     },
     watch: true,
     watchOptions: {
@@ -90,6 +91,12 @@ module.exports = {
             template: './demo/animate/index.html',
             inject: true,
             chunks: ['animate']
+        }),
+        new HtmlWebpackPlugin({
+            filename: './demo/process/index.html',
+            template: './demo/process/index.html',
+            inject: true,
+            chunks: ['process']
         }),
         new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin()

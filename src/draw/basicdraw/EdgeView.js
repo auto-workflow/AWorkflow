@@ -9,7 +9,7 @@ import Shape from '../../shape/Shape';
 import '../../shape/BezierCurveView';
 import '../../shape/TriangleView';
 import '../../shape/LineView';
-
+import '../../shape/TextView';
 
 /**
  * 连线
@@ -48,6 +48,32 @@ export default Edge.extend({
     },
 
     /**
+     * 渲染连线文字说明
+     */
+    renderText() {
+        const g = this.dom.group;
+        if (this.props.text && this.props.text.trim().length > 0) {
+            // const shape = this.props.config.text;
+            const ShapeClazz = Shape.getClazzByName('Text');
+            const props = {
+                normal: {
+                    style: {
+                        text: this.props.text,
+                        textFill: "#2A2F44",
+                        fontSize: 15
+                    }
+                },
+                position: this.props.textPosition
+            };
+            const s = new ShapeClazz({props});
+            s.init();
+            this.dom.text = s.dom;
+            this.children.text = s;
+            g.add(s.dom);
+        }
+    },
+
+    /**
      * 渲染整个连线图形
      *
      * @param {Object} options 渲染参数
@@ -58,6 +84,7 @@ export default Edge.extend({
         if (g) {
             g.removeAll();
         }
+        this.renderText();
         if (this.props.config && this.props.passPos) {
             let brokenLineGroup = new Group();
             let brokenLineBgGroup = new Group();

@@ -106,7 +106,7 @@ export function calcuLinePoints(edge, nodes) {
     const start = startCircle.position;
     const startDistance = startCircle.shape.r + startCircle.style.lineWidth - 1;
     let startOffset = [0, 0];
-    const endCircle = endNode.children.inputCircles[srcInArray[1]].dom;
+    const endCircle = endNode.children.inputCircles[distInArray[1]].dom;
     const end = endCircle.position;
     const endDisatance = endCircle.shape.r + endCircle.style.lineWidth - 1;
     let endOffset = [0, 0];

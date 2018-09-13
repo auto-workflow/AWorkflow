@@ -10,6 +10,7 @@ import '../../shape/RectView';
 import '../../shape/TextView';
 import '../../shape/ImageView';
 import '../../shape/CircleView';
+import '../../shape/PolygonView';
 
 /**
  * 节点
@@ -37,13 +38,16 @@ export default Node.extend({
         if (Array.isArray(this.props.input)) {
             const g = this.dom.group;
             const placement = this.props.config.inputCircle.circlePosition || 'top';
-            const inputPoints = this.getPointsPosition(this.props.input, placement);
+            let nodeType = this.props.config.box.name;
+            const inputPoints = nodeType === 'Polygon' ?
+                                this.getPolygonPointsPosition(this.props.input) :
+                                this.getRecPointsPosition(this.props.input, placement);
             this.props.input.forEach((input, index) => {
                 const ShapeClazz = Shape.getClazzByName('Circle');
                 const position = inputPoints[index];
                 const props = {
+                    ...this.props.config.inputCircle || {},
                     position,
-                    ...this.props.config.inputCircle || {}
                 };
                 const s = new ShapeClazz({
                     props
@@ -71,14 +75,25 @@ export default Node.extend({
     renderOutputCircle() {
         if (Array.isArray(this.props.output)) {
             const g = this.dom.group;
-            const placement = this.props.config.outputCircle.circlePosition || 'bottom';
-            const outputPoints = this.getPointsPosition(this.props.output, placement);
+
+            let nodeType = this.props.config.box.name;
+            let placement = '';
+
+            if (nodeType === 'Polygon') {
+
+            } else {
+                placement = this.props.config.outputCircle.circlePosition || 'bottom';
+            }
+            const outputPoints = nodeType === 'Polygon' ?
+                                this.getPolygonPointsPosition(this.props.output) :
+                                this.getRecPointsPosition(this.props.output, placement);
+
             this.props.output.forEach((output, index) => {
                 const ShapeClazz = Shape.getClazzByName('Circle');
                 const position = outputPoints[index];
                 const props = {
-                    position,
-                    ...this.props.config.outputCircle || {}
+                    ...this.props.config.outputCircle || {},
+                    position
                 };
                 const s = new ShapeClazz({
                     props

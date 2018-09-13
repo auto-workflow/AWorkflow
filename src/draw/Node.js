@@ -21,14 +21,14 @@ export default class Node {
     render() {}
 
     /**
-     * 将点在给出形状的某一边上等距排列，计算出每个点的坐标
+     * 将点在给出矩形形状的某一边上等距排列，计算出每个点的坐标
      *
      * @param {Array} points 点集合
      * @param {string} placement 位置top, right, bottom, left
      * @param {zrender.Rect=} box 图形
      * @return {Array<Array<number>>} 坐标
      */
-    getPointsPosition(points, placement, box) {
+    getRecPointsPosition(points, placement, box) {
         const b = box || this.dom.box;
         if (b && Array.isArray(points)) {
             const {x, y, width, height} = b.shape;
@@ -63,6 +63,52 @@ export default class Node {
                 else if (placement === 'top' || placement === 'bottom') {
                     return [start[0] + space * (index + 1), start[1]];
                 }
+            });
+        }
+        return [];
+    }
+
+    /**
+     * 将点在给出多边形形状的某一边上等距排列，计算出每个点的坐标
+     *
+     * @param {Array} points 点集合
+     * @param {string} placement 位置top, right, bottom, left
+     * @param {zrender.Polygon=} box 图形
+     * @return {Array<Array<number>>} 坐标
+     */
+    getPolygonPointsPosition(circles, box) {
+        const b = box || this.dom.box;
+        if (b && Array.isArray(circles)) {
+            let {points, width, height} = b.shape;
+            width = width || points[1][0] - points[3][0];
+            height = height || points[2][1] - points[0][1];
+            let start = [];
+            let space = 0;
+            return circles.map((circle, index) => {
+                let placement = circle.align || 'bottom';
+                switch (placement) {
+                    case 'top':
+                        start = points[0];
+                        space = width / (circles.length + 1);
+                        break;
+                    case 'right':
+                        start = points[1];
+                        space = height / (circles.length + 1);
+                        break;
+                    case 'bottom':
+                        start = points[2];
+                        space = width / (circles.length + 1);
+                        break;
+                    case 'left':
+                        start = points[3];
+                        space = width / (circles.length + 1);
+                        break;
+                    default:
+                       start = points[0];
+                       space = width / (circles.length + 1);
+                       break;
+                }
+                return [start[0], start[1]];
             });
         }
         return [];
