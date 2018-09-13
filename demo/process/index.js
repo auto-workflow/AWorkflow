@@ -3,7 +3,7 @@ import AWrokflow from '../../src/index';
 import defaultTemplate from  '../../src/template/defaultTemplate';
 
 
-let diamondTemplate = {
+const diamondTemplate = {
 };
 zrender.util.merge(diamondTemplate, defaultTemplate, {
     templateName: 'diamondTemplate'
