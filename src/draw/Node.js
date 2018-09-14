@@ -89,23 +89,18 @@ export default class Node {
                 switch (placement) {
                     case 'top':
                         start = points[0];
-                        space = width / (circles.length + 1);
                         break;
                     case 'right':
                         start = points[1];
-                        space = height / (circles.length + 1);
                         break;
                     case 'bottom':
                         start = points[2];
-                        space = width / (circles.length + 1);
                         break;
                     case 'left':
                         start = points[3];
-                        space = width / (circles.length + 1);
                         break;
                     default:
                        start = points[0];
-                       space = width / (circles.length + 1);
                        break;
                 }
                 return [start[0], start[1]];

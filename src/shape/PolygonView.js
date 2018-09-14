@@ -1,5 +1,5 @@
 /**
- * @file rect
+ * @file polygon
  * @author xueliqiang
  */
 
