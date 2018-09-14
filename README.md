@@ -22,6 +22,8 @@ npm run dev
 
 自定义模版：http://localhost:9999/demo/custom
 
+登陆流程图：http://localhost:9999/demo/process
+
 也可以访问在线demo:
 
 默认模版：http://zhoushengfe.com/flow/dist/index.html
