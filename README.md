@@ -34,6 +34,8 @@ npm run dev
 
 自定义模版：http://zhoushengfe.com/flow/dist/demo/custom/index.html
 
+登录流程图：http://zhoushengfe.com/flow/dist/demo/process/index.html
+
 ## 技术文档
 
 ### 快速开始
