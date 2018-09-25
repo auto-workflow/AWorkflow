@@ -141,9 +141,15 @@ let workflow = new AWrokflow(document.getElementById('aw'), {nodes, edges}, glob
 #### 模版
 
 模版是形状和样式的结合体，定义了节点（node）和连线（edge）的具体形状和样式
+
 默认为defaultTemplate，由矩形和文案组成
-系统还提供了iconTemplate模版，由一个icon和文案组成
+
+系统内置iconTemplate模版，由一个icon和文案组成
+
+系统内置菱形模版diamondTemplate，由菱形和文案组成
+
 当然还可以自定义模版，可以参考demo，定义了一个红色模版
+
 定义的模版可以在node和edge中使用，这样就可以画出不同的节点和连线了
 
 #### node
