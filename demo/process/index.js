@@ -1,25 +1,5 @@
 import zrender from 'zrender';
 import AWrokflow from '../../src/index';
-import defaultTemplate from  '../../src/template/defaultTemplate';
-
-
-const diamondTemplate = {
-};
-zrender.util.merge(diamondTemplate, defaultTemplate, {
-    templateName: 'diamondTemplate'
-});
-
-diamondTemplate.node.box.name = 'Polygon';
-diamondTemplate.node.box.normal.shape = {
-    // [top, right, bottom, left]
-    points: [[85, 0], [170, 50], [85, 100], [0, 50]]
-    // height: 100,
-    // width: 170
-};
-
-diamondTemplate.node.text.position = [45, 40];
-
-AWrokflow.registerTemplate('diamondTemplate', diamondTemplate);
 
 // 渲染参数
 let node1 = {

@@ -47,7 +47,7 @@ export default Node.extend({
                 const position = inputPoints[index];
                 const props = {
                     ...this.props.config.inputCircle || {},
-                    position,
+                    position
                 };
                 const s = new ShapeClazz({
                     props

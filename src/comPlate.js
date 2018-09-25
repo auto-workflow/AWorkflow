@@ -5,25 +5,8 @@
 
 import zrender from 'zrender';
 import defaultTemplate from './template/defaultTemplate';
-
-let iconTemplate = {
-};
-zrender.util.merge(iconTemplate, defaultTemplate, {
-    templateName: 'iconTemplate'
-});
-iconTemplate.node.icon = {
-    name: 'Image',
-    normal: {
-        style: {
-            image: '<@imgSrc>',
-            x: 10,
-            y: 6,
-            width: 18,
-            height: 18
-        },
-        origin: [19, 15]
-    }
-};
+import iconTemplate from './template/iconTemplate';
+import diamondTemplate from './template/diamondTemplate';
 
 // 自定义变量
 let defineDataReg = /<@(\w+)>/g;
@@ -31,8 +14,9 @@ let defineDataReg = /<@(\w+)>/g;
 export default class ComPlate {
     constructor() {
         this.templateObj = {
-            defaultTemplate: defaultTemplate,
-            iconTemplate: iconTemplate
+            defaultTemplate,
+            iconTemplate,
+            diamondTemplate
         };
     }
 
