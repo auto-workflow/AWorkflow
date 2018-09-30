@@ -144,7 +144,7 @@ let workflow = new AWrokflow(document.getElementById('aw'), {nodes, edges}, glob
 
 默认为defaultTemplate，由矩形和文案组成
 
-![image](https://github.com/ButBueatiful/dotvim/raw/master/screenshots/vim-screenshot.jpg)
+![image](https://github.com/auto-workflow/AWorkflow/blob/master/defaultTemplate.png)
 
 系统内置iconTemplate模版，由一个icon和文案组成
 
