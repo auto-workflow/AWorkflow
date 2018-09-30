@@ -144,9 +144,15 @@ let workflow = new AWrokflow(document.getElementById('aw'), {nodes, edges}, glob
 
 默认为defaultTemplate，由矩形和文案组成
 
+![image](https://github.com/ButBueatiful/dotvim/raw/master/screenshots/vim-screenshot.jpg)
+
 系统内置iconTemplate模版，由一个icon和文案组成
 
+![image](https://github.com/auto-workflow/AWorkflow/blob/master/iconTemplate.png)
+
 系统内置菱形模版diamondTemplate，由菱形和文案组成
+
+![image](https://github.com/auto-workflow/AWorkflow/blob/master/diamondTemplate.png)
 
 当然还可以自定义模版，可以参考demo，定义了一个红色模版
 
