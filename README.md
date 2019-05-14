@@ -16,13 +16,13 @@ npm run dev
 
 默认模版：http://localhost:9999/
 
-动画：http://localhost:9999/demo/animate
+动画：http://localhost:9999/demo/animate/index.html
 
-自动排列：http://localhost:9999/demo/autosort
+自动排列：http://localhost:9999/demo/autosort/index.html
 
-自定义模版：http://localhost:9999/demo/custom
+自定义模版：http://localhost:9999/demo/custom/index.html
 
-登陆流程图：http://localhost:9999/demo/process
+登陆流程图：http://localhost:9999/demo/process/index.html
 
 也可以访问在线demo:
 
